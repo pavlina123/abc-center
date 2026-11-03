@@ -2,43 +2,51 @@ import React, { useState } from 'react';
 import News from './News';
 import Specialists from './Specialists';
 import Services from './Services';
-import Media from './Media'; // <--- Добавили Медиа
+import Media from './Media';
 import { waLink } from './theme';
 
+// Обновили цвета карточек по брендбуку
 const helpItems = [
-  { title: "Логопедия", desc: "Коррекция речи", icon: "🗣️" },
-  { title: "Психология", desc: "Работа со страхами", icon: "🧠" },
-  { title: "Подготовка", desc: "К школе", icon: "🎒" },
-  { title: "Творчество", desc: "Развитие талантов", icon: "🎨" },
-  { title: "Нейропсихология", desc: "Внимание и память", icon: "⚡" },
-  { title: "Английский", desc: "Для детей", icon: "🇬🇧" }
+  { title: "Логопедия", desc: "Коррекция речи", icon: "🗣️", color: "bg-abc-green" },
+  { title: "Психология", desc: "Работа со страхами", icon: "🧠", color: "bg-abc-blue" },
+  { title: "Подготовка", desc: "К школе", icon: "🎒", color: "bg-abc-yellow" },
+  { title: "Творчество", desc: "Развитие талантов", icon: "🎨", color: "bg-abc-mango" },
+  { title: "Нейропсихология", desc: "Внимание и память", icon: "⚡", color: "bg-abc-pink" },
+  { title: "Английский", desc: "Для детей", icon: "🇬🇧", color: "bg-abc-lilac" }
 ];
 
 export default function Home({ onOpenSpecialist, onOpenService, onOpenNews }) {
   const [showHelp, setShowHelp] = useState(false);
 
   return (
-    <div className="flex flex-col overflow-hidden">
+    <div className="flex flex-col overflow-hidden bg-puzzle-pattern">
+      
       {/* HERO SECTION */}
-      <section className="relative bg-white pt-10 pb-16 md:py-24 rounded-b-[3rem] shadow-sm">
+      <section className="relative bg-white/80 backdrop-blur-sm pt-10 pb-16 md:py-24 rounded-b-[3rem] shadow-sm">
         <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="flex flex-col-reverse md:flex-row items-center gap-8 md:gap-12">
-            <div className="flex-1 text-center md:text-left">
-              <span className="inline-block py-1.5 px-4 rounded-full bg-abc-green/30 text-abc-dark text-xs md:text-sm font-black uppercase tracking-wider mb-6 animate-float">Добро пожаловать!</span>
+            <div className="flex-1 text-center md:text-left relative">
+              {/* Стикер солнышко */}
+              <div className="absolute -top-10 -left-6 text-5xl animate-float hidden md:block">☀️</div>
+              
+              <span className="inline-block py-1.5 px-4 rounded-full bg-abc-green/20 text-abc-dark text-xs md:text-sm font-black uppercase tracking-wider mb-6">Добро пожаловать!</span>
               <h1 className="text-3xl md:text-6xl font-black leading-tight mb-4 md:mb-6 text-abc-dark">
                 Раскрываем потенциал <span className="text-abc-blue">вашего ребенка</span> 🎈
               </h1>
-              <p className="text-sm md:text-lg text-gray-500 mb-8 max-w-lg mx-auto md:mx-0 font-medium">
+              <p className="text-sm md:text-lg text-gray-600 mb-8 max-w-lg mx-auto md:mx-0 font-medium">
                 Центр ABC — это международный центр развития. Мы объединили лучших специалистов и современные методики.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
-                <a href={waLink()} target="_blank" rel="noreferrer" className="bg-abc-yellow hover:bg-yellow-300 text-abc-dark px-8 py-4 rounded-2xl font-black text-base md:text-lg transition shadow-lg shadow-abc-yellow/40 hover:-translate-y-1 animate-pulse">
+                <a href={waLink()} target="_blank" rel="noreferrer" className="bg-abc-yellow hover:bg-yellow-400 text-abc-dark px-8 py-4 rounded-2xl font-black text-base md:text-lg transition shadow-lg shadow-abc-yellow/40 hover:-translate-y-1 animate-pulse">
                   Записаться на прием
                 </a>
               </div>
             </div>
             
-            <div className="flex-1 w-full max-w-[320px] md:max-w-xl mx-auto mb-6 md:mb-0">
+            <div className="flex-1 w-full max-w-[320px] md:max-w-xl mx-auto mb-6 md:mb-0 relative">
+              {/* Стикер облачко */}
+              <div className="absolute -top-6 -right-4 text-5xl animate-float hidden md:block" style={{ animationDelay: '1s' }}>☁️</div>
+              
               <div className="relative">
                 <div className="absolute inset-0 bg-abc-blue rounded-full blur-3xl opacity-20 transform scale-110"></div>
                 <img 
@@ -52,11 +60,11 @@ export default function Home({ onOpenSpecialist, onOpenService, onOpenNews }) {
         </div>
       </section>
 
-      {/* ЧЕМ МЫ ПОМОГАЕМ */}
+      {/* ЧЕМ МЫ ПОМОГАЕМ (Разноцветные карточки) */}
       <section className="py-16 max-w-5xl mx-auto px-4 text-center">
         <button 
           onClick={() => setShowHelp(!showHelp)}
-          className="bg-abc-green/40 hover:bg-abc-green/60 text-abc-dark px-8 py-4 rounded-full font-black text-xl transition-all shadow-md flex items-center gap-3 mx-auto"
+          className="bg-abc-yellow hover:bg-yellow-400 text-abc-dark px-8 py-4 rounded-full font-black text-xl transition-all shadow-md flex items-center gap-3 mx-auto"
         >
           {showHelp ? 'Скрыть' : 'Чем мы помогаем?'} 
           <svg className={`w-6 h-6 transition-transform duration-300 ${showHelp ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -67,12 +75,12 @@ export default function Home({ onOpenSpecialist, onOpenService, onOpenNews }) {
             {helpItems.map((item, i) => (
               <div 
                 key={i} 
-                className="bg-white p-4 md:p-6 rounded-3xl shadow-lg border border-abc-blue/20 animate-scale-up"
-                style={{ animationDelay: `${i * 50}ms` }}
+                className={`${item.color} p-4 md:p-6 rounded-3xl shadow-lg border-b-4 border-black/10 animate-bounce-in flex flex-col items-center justify-center text-center`}
+                style={{ animationDelay: `${i * 100}ms` }}
               >
-                <div className="text-4xl md:text-5xl mb-3">{item.icon}</div>
+                <div className="text-4xl md:text-5xl mb-3 bg-white/40 w-16 h-16 rounded-full flex items-center justify-center shadow-inner">{item.icon}</div>
                 <h3 className="font-black text-abc-dark text-sm md:text-lg mb-1">{item.title}</h3>
-                <p className="text-xs md:text-sm text-gray-500 font-medium">{item.desc}</p>
+                <p className="text-xs md:text-sm text-abc-dark/80 font-bold">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -82,10 +90,7 @@ export default function Home({ onOpenSpecialist, onOpenService, onOpenNews }) {
       <section id="news"><News onOpenNews={onOpenNews} /></section>
       <section id="specialists"><Specialists onOpenSpecialist={onOpenSpecialist} /></section>
       <section id="services"><Services onOpenService={onOpenService} /></section>
-      
-      {/* ДОБАВИЛИ МЕДИА */}
       <section id="media"><Media /></section>
-
     </div>
   );
 }
