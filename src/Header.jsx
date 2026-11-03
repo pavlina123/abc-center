@@ -1,6 +1,6 @@
 import React from 'react';
 import { waLink } from './theme';
-import logo from './assets/logo.png'; // <--- Импортируем твое фото
+import logo from './assets/logo.png'; 
 
 export default function Header({ currentPage, setCurrentPage, onLoginClick }) {
   const navItems = [
@@ -15,17 +15,13 @@ export default function Header({ currentPage, setCurrentPage, onLoginClick }) {
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg shadow-sm border-b border-abc-green/30">
       <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
         
-        {/* Логотип и название */}
-        <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentPage('home')}>
+        {/* ТОЛЬКО ЛОГОТИП (увеличенный) */}
+        <div className="cursor-pointer flex items-center" onClick={() => setCurrentPage('home')}>
           <img 
             src={logo} 
-            alt="Логотип Центра ABC" 
-            className="w-12 h-12 object-contain rounded-xl" 
+            alt="Логотип" 
+            className="h-12 md:h-16 w-auto object-contain" 
           />
-          <div>
-            <h1 className="text-xl font-black text-abc-dark leading-none">Центр ABC</h1>
-            <span className="text-[10px] text-abc-blue font-bold uppercase tracking-wider">Развитие детей</span>
-          </div>
         </div>
 
         <nav className="hidden lg:flex items-center gap-6">
