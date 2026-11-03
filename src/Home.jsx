@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import News from './News'; // <--- Добавили Новости
 import { waLink } from './theme';
 
 const helpItems = [
@@ -10,7 +11,7 @@ const helpItems = [
   { title: "Английский", desc: "Для детей", icon: "🇬🇧" }
 ];
 
-export default function Home() {
+export default function Home({ onOpenNews }) { // <--- Передали функцию для открытия новостей
   const [showHelp, setShowHelp] = useState(false);
 
   return (
@@ -34,7 +35,6 @@ export default function Home() {
               </div>
             </div>
             
-            {/* Широкое фото */}
             <div className="flex-1 w-full max-w-[320px] md:max-w-xl mx-auto mb-6 md:mb-0">
               <div className="relative">
                 <div className="absolute inset-0 bg-abc-blue rounded-full blur-3xl opacity-20 transform scale-110"></div>
@@ -74,6 +74,11 @@ export default function Home() {
             ))}
           </div>
         )}
+      </section>
+
+      {/* ДОБАВИЛИ НОВОСТИ */}
+      <section id="news">
+        <News onOpenNews={onOpenNews} />
       </section>
     </div>
   );
