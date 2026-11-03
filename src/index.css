@@ -5,11 +5,15 @@
   --font-sans: 'Nunito', sans-serif;
   --font-display: 'Montserrat', sans-serif;
   
-  --color-abc-green: #86efac; /* Нежный зеленый */
-  --color-abc-blue: #7dd3fc;  /* Небесно-голубой */
-  --color-abc-yellow: #fde047; /* Солнечный желтый */
-  --color-abc-bg: #f0fdf4; /* Очень светлый фон */
-  --color-abc-dark: #1e293b; /* Темный для текста */
+  --color-abc-green: #86efac;
+  --color-abc-blue: #7dd3fc;
+  --color-abc-yellow: #fde047;
+  --color-abc-bg: #f0fdf4;
+  --color-abc-dark: #1e293b;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {

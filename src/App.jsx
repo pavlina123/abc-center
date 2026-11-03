@@ -4,7 +4,7 @@ import Home from './Home';
 import Specialists from './Specialists';
 import Services from './Services';
 import News from './News';
-import Media from './Media'; // <-- Добавили
+import Media from './Media';
 import Login from './Login';
 import AdminPanel from './AdminPanel';
 import MediaPanel from './MediaPanel';
@@ -45,8 +45,12 @@ export default function App() {
   return (
     <div className="min-h-screen bg-abc-bg text-abc-dark font-sans">
       <Header currentPage={currentPage} setCurrentPage={setCurrentPage} onLoginClick={() => setShowLogin(true)} />
+      
       <main className="animate-fade-in">
-        {currentPage === 'home' && <Home onNavigate={setCurrentPage} />}
+        {/* Главная страница теперь содержит ВСЕ секции */}
+        {currentPage === 'home' && <Home />}
+        
+        {/* Оставляем отдельные страницы для ПК-навигации */}
         {currentPage === 'specialists' && <Specialists />}
         {currentPage === 'services' && <Services />}
         {currentPage === 'news' && <News />}
