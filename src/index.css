@@ -1,15 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Nunito:wght@400;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
+  /* Шрифт из брендбука */
   --font-sans: 'Nunito', sans-serif;
-  --font-display: 'Montserrat', sans-serif;
+  --font-display: 'Nunito', sans-serif; /* Для заголовков используем тот же, но жирный */
   
-  --color-abc-green: #86efac;
-  --color-abc-blue: #7dd3fc;
-  --color-abc-yellow: #fde047;
-  --color-abc-bg: #f0fdf4;
-  --color-abc-dark: #1e293b;
+  /* Официальные цвета бренда ABC */
+  --color-abc-green: #87BD71;
+  --color-abc-yellow: #F4BC3A;
+  --color-abc-blue: #99C1E6;
+  --color-abc-mango: #F6A96D;
+  --color-abc-pink: #F49BB0;
+  
+  --color-abc-bg: #fcfdfa; /* Очень светлый фон, чтобы не резал глаза */
+  --color-abc-dark: #3E2723; /* Темно-коричневый для текста (вместо черного) */
 }
 
 html {
