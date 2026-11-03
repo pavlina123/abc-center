@@ -5,17 +5,16 @@ import { formatPrice } from './theme';
 export default function AdminPanel({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('dashboard');
   
-  // Стейты для данных
   const [specialists, setSpecialists] = useState([]);
   const [services, setServices] = useState([]);
   const [news, setNews] = useState([]);
   const [media, setMedia] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Стейты для форм
   const [formData, setFormData] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [galleryUpload, setGalleryUpload] = useState(false);
 
   useEffect(() => {
     fetchAllData();
@@ -53,18 +52,35 @@ export default function AdminPanel({ user, onLogout }) {
     if (!error) {
       const { data } = supabase.storage.from('abc-media').getPublicUrl(fileName);
       
-      // Сохраняем ссылку в нужное поле в зависимости от вкладки
-      if (activeTab === 'news') {
-        setFormData(prev => ({ ...prev, cover_photo: data.publicUrl }));
-      } else if (activeTab === 'specialists' || activeTab === 'services') {
-        setFormData(prev => ({ ...prev, photo: data.publicUrl }));
-      } else {
-        setFormData(prev => ({ ...prev, url: data.publicUrl }));
-      }
-    } else {
-      alert('Ошибка загрузки: ' + error.message);
+      if (activeTab === 'news') setFormData(prev => ({ ...prev, cover_photo: data.publicUrl }));
+      else if (activeTab === 'media') setFormData(prev => ({ ...prev, url: data.publicUrl }));
+      else setFormData(prev => ({ ...prev, photo: data.publicUrl }));
     }
     setUploading(false);
+  };
+
+  // Загрузка доп. фото для специалиста (сертификаты)
+  const handleGalleryUpload = async (e) => {
+    const files = e.target.files;
+    if (!files.length) return;
+    setGalleryUpload(true);
+    
+    let newGallery = formData.gallery ? [...formData.gallery] : [];
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const { error } = await supabase.storage.from('abc-media').upload(fileName, file);
+      
+      if (!error) {
+        const { data } = supabase.storage.from('abc-media').getPublicUrl(fileName);
+        newGallery.push(data.publicUrl);
+      }
+    }
+    
+    setFormData(prev => ({ ...prev, gallery: newGallery }));
+    setGalleryUpload(false);
   };
 
   const deleteItem = async (table, id) => {
@@ -75,8 +91,6 @@ export default function AdminPanel({ user, onLogout }) {
 
   const saveItem = async (e, table) => {
     e.preventDefault();
-    
-    // Очищаем данные от пустых полей
     const dataToSave = {};
     Object.keys(formData).forEach(key => {
       const val = formData[key];
@@ -95,10 +109,8 @@ export default function AdminPanel({ user, onLogout }) {
       error = err;
     }
     
-    if (error) {
-      alert('Ошибка при сохранении: ' + error.message);
-      console.error('Ошибка Supabase:', error);
-    } else {
+    if (error) alert('Ошибка: ' + error.message);
+    else {
       setFormData({});
       setIsEditing(false);
       fetchAllData();
@@ -118,7 +130,6 @@ export default function AdminPanel({ user, onLogout }) {
 
   return (
     <div className="min-h-screen bg-abc-bg flex flex-col md:flex-row">
-      {/* Сайдбар */}
       <aside className="w-full md:w-64 bg-white border-r border-abc-green/30 flex-shrink-0 p-4 md:p-6 flex flex-col shadow-sm z-10">
         <div className="flex items-center gap-3 mb-10">
           <div className="w-10 h-10 bg-abc-yellow text-abc-dark rounded-xl flex items-center justify-center text-xl font-black shadow-md">ABC</div>
@@ -134,6 +145,7 @@ export default function AdminPanel({ user, onLogout }) {
             { id: 'specialists', label: 'Специалисты', icon: '👨‍⚕️' },
             { id: 'services', label: 'Услуги', icon: '📚' },
             { id: 'news', label: 'Новости', icon: '📰' },
+            { id: 'media', label: 'Медиа', icon: '🎬' }, // Добавили вкладку
           ].map(item => (
             <button key={item.id} onClick={() => { setActiveTab(item.id); cancelEdit(); }} className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition whitespace-nowrap ${activeTab === item.id ? 'bg-abc-green text-abc-dark shadow-sm' : 'text-gray-500 hover:bg-abc-bg hover:text-abc-dark'}`}>
               <span>{item.icon}</span> {item.label}
@@ -146,48 +158,44 @@ export default function AdminPanel({ user, onLogout }) {
         </div>
       </aside>
 
-      {/* Контентная часть */}
       <main className="flex-1 p-4 md:p-8 overflow-y-auto">
         <header className="flex justify-between items-center mb-8">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-black text-abc-dark">
-              {activeTab === 'dashboard' && 'Обзор'}
-              {activeTab === 'specialists' && 'Специалисты'}
-              {activeTab === 'services' && 'Услуги'}
-              {activeTab === 'news' && 'Новости'}
-            </h2>
-            <p className="text-gray-500 text-sm mt-1">Вы вошли как: {user.name}</p>
-          </div>
+          <h2 className="text-2xl md:text-3xl font-black text-abc-dark">
+            {activeTab === 'dashboard' && 'Обзор'}
+            {activeTab === 'specialists' && 'Специалисты'}
+            {activeTab === 'services' && 'Услуги'}
+            {activeTab === 'news' && 'Новости'}
+            {activeTab === 'media' && 'Медиагалерея'}
+          </h2>
           <button onClick={onLogout} className="md:hidden bg-red-50 text-red-500 px-4 py-2 rounded-xl font-bold text-sm">Выйти</button>
         </header>
 
         {loading ? (
-          <div className="text-center py-20 text-gray-400 font-bold">Загрузка данных...</div>
+          <div className="text-center py-20 text-gray-400 font-bold">Загрузка...</div>
         ) : (
           <div className="animate-fade-in">
             
-            {/* ДАШБОРД */}
             {activeTab === 'dashboard' && (
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-white p-6 rounded-3xl border border-abc-green/30 shadow-sm">
-                  <span className="text-4xl block mb-2">👨‍⚕️</span>
-                  <span className="text-xs text-gray-500 font-bold uppercase">Специалисты</span>
-                  <div className="text-3xl font-black text-abc-dark">{specialists.length}</div>
+              <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                <div className="bg-white p-4 rounded-3xl border border-abc-green/30 shadow-sm text-center">
+                  <span className="text-3xl block mb-2">👨‍⚕️</span>
+                  <div className="text-2xl font-black text-abc-dark">{specialists.length}</div>
+                  <span className="text-[10px] text-gray-500 font-bold uppercase">Специалисты</span>
                 </div>
-                <div className="bg-white p-6 rounded-3xl border border-abc-green/30 shadow-sm">
-                  <span className="text-4xl block mb-2">📚</span>
-                  <span className="text-xs text-gray-500 font-bold uppercase">Услуги</span>
-                  <div className="text-3xl font-black text-abc-dark">{services.length}</div>
+                <div className="bg-white p-4 rounded-3xl border border-abc-green/30 shadow-sm text-center">
+                  <span className="text-3xl block mb-2">📚</span>
+                  <div className="text-2xl font-black text-abc-dark">{services.length}</div>
+                  <span className="text-[10px] text-gray-500 font-bold uppercase">Услуги</span>
                 </div>
-                <div className="bg-white p-6 rounded-3xl border border-abc-green/30 shadow-sm">
-                  <span className="text-4xl block mb-2">📰</span>
-                  <span className="text-xs text-gray-500 font-bold uppercase">Новости</span>
-                  <div className="text-3xl font-black text-abc-dark">{news.length}</div>
+                <div className="bg-white p-4 rounded-3xl border border-abc-green/30 shadow-sm text-center">
+                  <span className="text-3xl block mb-2">📰</span>
+                  <div className="text-2xl font-black text-abc-dark">{news.length}</div>
+                  <span className="text-[10px] text-gray-500 font-bold uppercase">Новости</span>
                 </div>
-                <div className="bg-white p-6 rounded-3xl border border-abc-green/30 shadow-sm">
-                  <span className="text-4xl block mb-2">🎬</span>
-                  <span className="text-xs text-gray-500 font-bold uppercase">Медиа</span>
-                  <div className="text-3xl font-black text-abc-dark">{media.length}</div>
+                <div className="bg-white p-4 rounded-3xl border border-abc-green/30 shadow-sm text-center">
+                  <span className="text-3xl block mb-2">🎬</span>
+                  <div className="text-2xl font-black text-abc-dark">{media.length}</div>
+                  <span className="text-[10px] text-gray-500 font-bold uppercase">Медиа</span>
                 </div>
               </div>
             )}
@@ -198,77 +206,46 @@ export default function AdminPanel({ user, onLogout }) {
                 <form onSubmit={(e) => saveItem(e, 'specialists')} className="bg-white p-6 rounded-3xl shadow-sm border border-abc-green/30 mb-8">
                   <h3 className="text-lg font-black mb-4">{isEditing ? 'Редактировать' : 'Добавить'} специалиста</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="text" name="name" value={formData.name || ''} onChange={handleInputChange} placeholder="Имя специалиста" required className="border border-gray-200 p-3 rounded-xl focus:border-abc-green outline-none" />
-                    <input type="text" name="role" value={formData.role || ''} onChange={handleInputChange} placeholder="Должность (Логопед, Психолог)" required className="border border-gray-200 p-3 rounded-xl focus:border-abc-green outline-none" />
-                    <input type="text" name="experience" value={formData.experience || ''} onChange={handleInputChange} placeholder="Опыт работы (например, 5 лет)" className="border border-gray-200 p-3 rounded-xl focus:border-abc-green outline-none" />
+                    <input type="text" name="name" value={formData.name || ''} onChange={handleInputChange} placeholder="Имя" required className="border border-gray-200 p-3 rounded-xl" />
+                    <input type="text" name="role" value={formData.role || ''} onChange={handleInputChange} placeholder="Должность" required className="border border-gray-200 p-3 rounded-xl" />
+                    <input type="text" name="experience" value={formData.experience || ''} onChange={handleInputChange} placeholder="Опыт (например, 5 лет)" className="border border-gray-200 p-3 rounded-xl" />
                     <div>
-                      <label className="text-xs text-gray-500 mb-1 block font-bold">Фото</label>
+                      <label className="text-xs text-gray-500 block mb-1">Главное фото</label>
                       <input type="file" accept="image/*" onChange={handleFileUpload} className="text-sm" />
-                      {uploading && <span className="text-xs text-blue-500">Загрузка...</span>}
-                      {formData.photo && <img src={formData.photo} className="w-12 h-12 object-cover rounded mt-2" alt="preview" />}
+                      {formData.photo && <img src={formData.photo} className="w-12 h-12 object-cover rounded mt-2" />}
                     </div>
                   </div>
-                  <textarea name="description" value={formData.description || ''} onChange={handleInputChange} placeholder="Краткое описание" rows="3" className="w-full border border-gray-200 p-3 rounded-xl mt-4 focus:border-abc-green outline-none"></textarea>
+                  
+                  <textarea name="description" value={formData.description || ''} onChange={handleInputChange} placeholder="Описание (можно с абзацами)" rows="4" className="w-full border border-gray-200 p-3 rounded-xl mt-4"></textarea>
+                  
+                  {/* Загрузка доп фото (сертификатов) */}
+                  <div className="mt-4">
+                    <label className="text-xs text-gray-500 block mb-1">Доп. фото / Сертификаты</label>
+                    <input type="file" multiple accept="image/*" onChange={handleGalleryUpload} className="text-sm" />
+                    {galleryUpload && <span className="text-xs text-blue-500">Загрузка...</span>}
+                    <div className="flex gap-2 mt-2">
+                      {formData.gallery && formData.gallery.map((img, i) => (
+                        <img key={i} src={img} className="w-10 h-10 object-cover rounded" />
+                      ))}
+                    </div>
+                  </div>
+
                   <div className="flex gap-2 mt-4">
                     <button type="submit" className="bg-abc-green text-abc-dark px-6 py-2 rounded-xl font-black">Сохранить</button>
-                    {isEditing && <button type="button" onClick={cancelEdit} className="bg-gray-200 text-gray-600 px-6 py-2 rounded-xl font-bold">Отмена</button>}
+                    {isEditing && <button type="button" onClick={cancelEdit} className="bg-gray-200 px-6 py-2 rounded-xl font-bold">Отмена</button>}
                   </div>
                 </form>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {specialists.map(item => (
                     <div key={item.id} className="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm flex gap-4">
-                      {item.photo ? <img src={item.photo} className="w-20 h-20 object-cover rounded-xl" /> : <div className="w-20 h-20 bg-abc-bg rounded-xl flex items-center justify-center text-2xl">👤</div>}
+                      {item.photo ? <img src={item.photo} className="w-20 h-20 object-cover rounded-xl" /> : <div className="w-20 h-20 bg-abc-bg rounded-xl"></div>}
                       <div className="flex-1">
-                        <h4 className="font-black text-lg text-abc-dark">{item.name}</h4>
+                        <h4 className="font-black text-lg">{item.name}</h4>
                         <p className="text-abc-blue text-sm font-bold">{item.role}</p>
                         <div className="flex gap-2 mt-2">
                           <button onClick={() => startEdit(item)} className="text-xs font-bold text-blue-500 hover:underline">Изменить</button>
                           <button onClick={() => deleteItem('specialists', item.id)} className="text-xs font-bold text-red-500 hover:underline">Удалить</button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* УСЛУГИ */}
-            {activeTab === 'services' && (
-              <div>
-                <form onSubmit={(e) => saveItem(e, 'services')} className="bg-white p-6 rounded-3xl shadow-sm border border-abc-green/30 mb-8">
-                  <h3 className="text-lg font-black mb-4">{isEditing ? 'Редактировать' : 'Добавить'} услугу</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="text" name="title" value={formData.title || ''} onChange={handleInputChange} placeholder="Название услуги" required className="border border-gray-200 p-3 rounded-xl focus:border-abc-green outline-none" />
-                    <input type="text" name="price" value={formData.price || ''} onChange={handleInputChange} placeholder="Цена (или оставь пустым)" className="border border-gray-200 p-3 rounded-xl focus:border-abc-green outline-none" />
-                    <input type="text" name="icon" value={formData.icon || ''} onChange={handleInputChange} placeholder="Эмодзи (например, 🧠)" className="border border-gray-200 p-3 rounded-xl focus:border-abc-green outline-none" />
-                    
-                    <div>
-                      <label className="text-xs text-gray-500 mb-1 block font-bold">Фото услуги (квадратик)</label>
-                      <input type="file" accept="image/*" onChange={handleFileUpload} className="text-sm" />
-                      {uploading && <span className="text-xs text-blue-500">Загрузка...</span>}
-                      {formData.photo && <img src={formData.photo} className="w-12 h-12 object-cover rounded mt-2" alt="preview" />}
-                    </div>
-                  </div>
-                  <textarea name="description" value={formData.description || ''} onChange={handleInputChange} placeholder="Описание услуги" rows="3" className="w-full border border-gray-200 p-3 rounded-xl mt-4 focus:border-abc-green outline-none"></textarea>
-                  <div className="flex gap-2 mt-4">
-                    <button type="submit" className="bg-abc-green text-abc-dark px-6 py-2 rounded-xl font-black">Сохранить</button>
-                    {isEditing && <button type="button" onClick={cancelEdit} className="bg-gray-200 text-gray-600 px-6 py-2 rounded-xl font-bold">Отмена</button>}
-                  </div>
-                </form>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {services.map(item => (
-                    <div key={item.id} className="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between">
-                      <div>
-                        <h4 className="font-black text-lg text-abc-dark">{item.icon} {item.title}</h4>
-                        <p className="text-gray-500 text-sm line-clamp-2">{item.description}</p>
-                      </div>
-                      <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
-                        <span className="font-black text-abc-blue">{formatPrice(item.price)}</span>
-                        <div className="flex gap-2">
-                          <button onClick={() => startEdit(item)} className="text-xs font-bold text-blue-500 hover:underline">Изменить</button>
-                          <button onClick={() => deleteItem('services', item.id)} className="text-xs font-bold text-red-500 hover:underline">Удалить</button>
                         </div>
                       </div>
                     </div>
@@ -283,22 +260,21 @@ export default function AdminPanel({ user, onLogout }) {
                 <form onSubmit={(e) => saveItem(e, 'news')} className="bg-white p-6 rounded-3xl shadow-sm border border-abc-green/30 mb-8">
                   <h3 className="text-lg font-black mb-4">{isEditing ? 'Редактировать' : 'Добавить'} новость</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="text" name="title" value={formData.title || ''} onChange={handleInputChange} placeholder="Заголовок" required className="border border-gray-200 p-3 rounded-xl focus:border-abc-green outline-none" />
-                    <select name="status" value={formData.status || 'published'} onChange={handleInputChange} className="border border-gray-200 p-3 rounded-xl focus:border-abc-green outline-none bg-white">
+                    <input type="text" name="title" value={formData.title || ''} onChange={handleInputChange} placeholder="Заголовок" required className="border border-gray-200 p-3 rounded-xl" />
+                    <select name="status" value={formData.status || 'published'} onChange={handleInputChange} className="border border-gray-200 p-3 rounded-xl bg-white">
                       <option value="published">Опубликовано</option>
                       <option value="draft">Черновик</option>
                     </select>
                     <div>
-                      <label className="text-xs text-gray-500 mb-1 block font-bold">Обложка</label>
+                      <label className="text-xs text-gray-500 block mb-1">Обложка</label>
                       <input type="file" accept="image/*" onChange={handleFileUpload} className="text-sm" />
-                      {uploading && <span className="text-xs text-blue-500">Загрузка...</span>}
-                      {formData.cover_photo && <img src={formData.cover_photo} className="w-16 h-10 object-cover rounded mt-2" alt="preview" />}
+                      {formData.cover_photo && <img src={formData.cover_photo} className="w-16 h-10 object-cover rounded mt-2" />}
                     </div>
                   </div>
-                  <textarea name="content" value={formData.content || ''} onChange={handleInputChange} placeholder="Текст новости" rows="5" className="w-full border border-gray-200 p-3 rounded-xl mt-4 focus:border-abc-green outline-none"></textarea>
+                  <textarea name="content" value={formData.content || ''} onChange={handleInputChange} placeholder="Текст новости (можно с абзацами)" rows="6" className="w-full border border-gray-200 p-3 rounded-xl mt-4"></textarea>
                   <div className="flex gap-2 mt-4">
                     <button type="submit" className="bg-abc-green text-abc-dark px-6 py-2 rounded-xl font-black">Сохранить</button>
-                    {isEditing && <button type="button" onClick={cancelEdit} className="bg-gray-200 text-gray-600 px-6 py-2 rounded-xl font-bold">Отмена</button>}
+                    {isEditing && <button type="button" onClick={cancelEdit} className="bg-gray-200 px-6 py-2 rounded-xl font-bold">Отмена</button>}
                   </div>
                 </form>
 
@@ -306,14 +282,86 @@ export default function AdminPanel({ user, onLogout }) {
                   {news.map(item => (
                     <div key={item.id} className="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm flex flex-col">
                       {item.cover_photo && <img src={item.cover_photo} className="w-full h-32 object-cover rounded-xl mb-3" />}
-                      <span className={`text-[10px] font-black uppercase px-2 py-1 rounded self-start mb-2 ${item.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
-                        {item.status === 'published' ? 'Опубликовано' : 'Черновик'}
-                      </span>
-                      <h4 className="font-black text-lg text-abc-dark">{item.title}</h4>
-                      <p className="text-gray-500 text-sm line-clamp-3 mt-1">{item.content}</p>
+                      <h4 className="font-black text-lg">{item.title}</h4>
                       <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100">
                         <button onClick={() => startEdit(item)} className="text-xs font-bold text-blue-500 hover:underline">Изменить</button>
                         <button onClick={() => deleteItem('news', item.id)} className="text-xs font-bold text-red-500 hover:underline">Удалить</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* УСЛУГИ */}
+            {activeTab === 'services' && (
+               <div>
+                <form onSubmit={(e) => saveItem(e, 'services')} className="bg-white p-6 rounded-3xl shadow-sm border border-abc-green/30 mb-8">
+                  <h3 className="text-lg font-black mb-4">{isEditing ? 'Редактировать' : 'Добавить'} услугу</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" name="title" value={formData.title || ''} onChange={handleInputChange} placeholder="Название" required className="border border-gray-200 p-3 rounded-xl" />
+                    <input type="text" name="price" value={formData.price || ''} onChange={handleInputChange} placeholder="Цена" className="border border-gray-200 p-3 rounded-xl" />
+                    <div>
+                      <label className="text-xs text-gray-500 block mb-1">Фото</label>
+                      <input type="file" accept="image/*" onChange={handleFileUpload} className="text-sm" />
+                      {formData.photo && <img src={formData.photo} className="w-12 h-12 object-cover rounded mt-2" />}
+                    </div>
+                  </div>
+                  <textarea name="description" value={formData.description || ''} onChange={handleInputChange} placeholder="Описание (можно с абзацами)" rows="4" className="w-full border border-gray-200 p-3 rounded-xl mt-4"></textarea>
+                  <div className="flex gap-2 mt-4">
+                    <button type="submit" className="bg-abc-green text-abc-dark px-6 py-2 rounded-xl font-black">Сохранить</button>
+                    {isEditing && <button type="button" onClick={cancelEdit} className="bg-gray-200 px-6 py-2 rounded-xl font-bold">Отмена</button>}
+                  </div>
+                </form>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {services.map(item => (
+                    <div key={item.id} className="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between">
+                      <div>
+                        <h4 className="font-black text-lg">{item.title}</h4>
+                        <p className="text-gray-500 text-sm line-clamp-2 text-paragraphs">{item.description}</p>
+                      </div>
+                      <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
+                        <span className="font-black text-abc-blue">{formatPrice(item.price)}</span>
+                        <div className="flex gap-2">
+                          <button onClick={() => startEdit(item)} className="text-xs font-bold text-blue-500 hover:underline">Изменить</button>
+                          <button onClick={() => deleteItem('services', item.id)} className="text-xs font-bold text-red-500 hover:underline">Удалить</button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* МЕДИА (НОВАЯ ВКЛАДКА) */}
+            {activeTab === 'media' && (
+              <div>
+                <form onSubmit={(e) => saveItem(e, 'media')} className="bg-white p-6 rounded-3xl shadow-sm border border-abc-green/30 mb-8">
+                  <h3 className="text-lg font-black mb-4">{isEditing ? 'Редактировать' : 'Добавить'} видео/фото</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" name="title" value={formData.title || ''} onChange={handleInputChange} placeholder="Название видео" required className="border border-gray-200 p-3 rounded-xl" />
+                    <div>
+                      <label className="text-xs text-gray-500 block mb-1">Ссылка на YouTube или загрузите файл</label>
+                      <input type="text" name="url" value={formData.url || ''} onChange={handleInputChange} placeholder="https://youtube.com/..." className="border border-gray-200 p-3 rounded-xl w-full mb-2" />
+                      <input type="file" accept="video/*,image/*" onChange={handleFileUpload} className="text-sm" />
+                      {uploading && <span className="text-xs text-blue-500">Загрузка...</span>}
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                    <button type="submit" className="bg-abc-green text-abc-dark px-6 py-2 rounded-xl font-black">Сохранить</button>
+                    {isEditing && <button type="button" onClick={cancelEdit} className="bg-gray-200 px-6 py-2 rounded-xl font-bold">Отмена</button>}
+                  </div>
+                </form>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {media.map(item => (
+                    <div key={item.id} className="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm flex flex-col">
+                      <h4 className="font-black text-sm mb-2">{item.title}</h4>
+                      <p className="text-xs text-gray-400 truncate mb-4">{item.url}</p>
+                      <div className="flex gap-2 mt-auto">
+                        <button onClick={() => startEdit(item)} className="text-xs font-bold text-blue-500 hover:underline">Изменить</button>
+                        <button onClick={() => deleteItem('media', item.id)} className="text-xs font-bold text-red-500 hover:underline">Удалить</button>
                       </div>
                     </div>
                   ))}
