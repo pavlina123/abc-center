@@ -1,89 +1,50 @@
-import React, { useState } from 'react';
-import News from './News';
-import Specialists from './Specialists';
-import Services from './Services';
-import Media from './Media';
-import { waLink } from './theme';
+import React, { useState, useEffect } from 'react';
+import { supabase } from './supabaseClient';
 
-const helpItems = [
-  { title: "Логопедия", desc: "Коррекция речи", icon: "🗣️" },
-  { title: "Психология", desc: "Работа со страхами", icon: "🧠" },
-  { title: "Подготовка", desc: "К школе", icon: "🎒" },
-  { title: "Творчество", desc: "Развитие талантов", icon: "🎨" },
-  { title: "Нейропсихология", desc: "Внимание и память", icon: "⚡" },
-  { title: "Английский", desc: "Для детей", icon: "🇬🇧" }
-];
+export default function Specialists({ onOpenSpecialist }) {
+  const [specialists, setSpecialists] = useState([]);
 
-export default function Home({ onOpenSpecialist, onOpenService, onOpenNews }) {
-  const [showHelp, setShowHelp] = useState(false);
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data } = await supabase.from('specialists').select('*').order('created_at', { ascending: true });
+      if (data) setSpecialists(data);
+    };
+    fetchData();
+  }, []);
 
   return (
-    <div className="flex flex-col overflow-hidden">
-      {/* HERO SECTION */}
-      <section className="relative bg-white pt-10 pb-16 md:py-24 rounded-b-[3rem] shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 relative z-10">
-          <div className="flex flex-col-reverse md:flex-row items-center gap-8 md:gap-12">
-            <div className="flex-1 text-center md:text-left">
-              <span className="inline-block py-1.5 px-4 rounded-full bg-abc-green/30 text-abc-dark text-xs md:text-sm font-black uppercase tracking-wider mb-6 animate-float">Добро пожаловать!</span>
-              <h1 className="text-3xl md:text-6xl font-black leading-tight mb-4 md:mb-6 text-abc-dark">
-                Раскрываем потенциал <span className="text-abc-blue">вашего ребенка</span> 🎈
-              </h1>
-              <p className="text-sm md:text-lg text-gray-500 mb-8 max-w-lg mx-auto md:mx-0 font-medium">
-                Центр ABC — это международный центр развития. Мы объединили лучших специалистов и современные методики, чтобы каждый ребенок рос счастливым и уверенным в себе.
+    <div className="py-16 px-4 max-w-7xl mx-auto">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl md:text-5xl font-black text-abc-dark mb-4">Наши специалисты</h1>
+        <p className="text-gray-500 font-medium max-w-xl mx-auto">Команда профессионалов центра ABC.</p>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
+        {specialists.map(spec => (
+          <div key={spec.id} className="bg-white rounded-3xl overflow-hidden shadow-lg border border-abc-green/20 flex flex-col group transition-transform hover:-translate-y-2 hover:shadow-2xl duration-300">
+            <div className="relative w-full aspect-[3/4] overflow-hidden cursor-pointer" onClick={() => onOpenSpecialist(spec)}>
+              {spec.photo ? (
+                <img src={spec.photo} alt={spec.name} className="w-full h-full object-cover group-hover:scale-110 transition duration-700" />
+              ) : (
+                <div className="w-full h-full bg-abc-bg flex items-center justify-center text-5xl">🧸</div>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-90"></div>
+              <div className="absolute bottom-2 left-2 right-2 text-white">
+                <h3 className="text-sm md:text-lg font-black leading-tight">{spec.name}</h3>
+                <p className="text-[10px] md:text-xs font-bold text-abc-blue">{spec.role}</p>
+              </div>
+            </div>
+            <div className="p-2 md:p-4 flex flex-col flex-1">
+              <p className="text-[10px] md:text-sm text-gray-500 line-clamp-2 mb-3 text-paragraphs">
+                {spec.description || 'Специалист пока не добавил описание.'}
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
-                <a href={waLink()} target="_blank" rel="noreferrer" className="bg-abc-yellow hover:bg-yellow-300 text-abc-dark px-8 py-4 rounded-2xl font-black text-base md:text-lg transition shadow-lg shadow-abc-yellow/40 hover:-translate-y-1 animate-pulse">
-                  Записаться на прием
-                </a>
-              </div>
-            </div>
-            
-            {/* Широкое фото */}
-            <div className="flex-1 w-full max-w-[320px] md:max-w-xl mx-auto mb-6 md:mb-0">
-              <div className="relative">
-                <div className="absolute inset-0 bg-abc-blue rounded-full blur-3xl opacity-20 transform scale-110"></div>
-                <img 
-                  src="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&q=80&w=1000" 
-                  alt="Наш центр" 
-                  className="rounded-[2rem] md:rounded-[3rem] shadow-2xl relative z-10 border-4 md:border-8 border-white w-full object-cover aspect-[4/3] md:aspect-video" 
-                />
-              </div>
+              <button onClick={() => onOpenSpecialist(spec)} className="mt-auto w-full bg-abc-blue/20 text-abc-dark md:bg-abc-green md:hover:bg-green-300 font-black py-1.5 md:py-2.5 rounded-xl transition text-[10px] md:text-sm">
+                Ознакомиться
+              </button>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* ЧЕМ МЫ ПОМОГАЕМ (Аккордеон) */}
-      <section className="py-16 max-w-5xl mx-auto px-4 text-center">
-        <button 
-          onClick={() => setShowHelp(!showHelp)}
-          className="bg-abc-green/40 hover:bg-abc-green/60 text-abc-dark px-8 py-4 rounded-full font-black text-xl transition-all shadow-md flex items-center gap-3 mx-auto"
-        >
-          {showHelp ? 'Скрыть' : 'Чем мы помогаем?'} 
-          <svg className={`w-6 h-6 transition-transform duration-300 ${showHelp ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-        </button>
-
-        {showHelp && (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 mt-8">
-            {helpItems.map((item, i) => (
-              <div 
-                key={i} 
-                className="bg-white p-4 md:p-6 rounded-3xl shadow-lg border border-abc-blue/20 animate-scale-up"
-                style={{ animationDelay: `${i * 50}ms` }}
-              >
-                <div className="text-4xl md:text-5xl mb-3">{item.icon}</div>
-                <h3 className="font-black text-abc-dark text-sm md:text-lg mb-1">{item.title}</h3>
-                <p className="text-xs md:text-sm text-gray-500 font-medium">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section id="news"><News onOpenNews={onOpenNews} /></section>
-      <section id="specialists"><Specialists onOpenSpecialist={onOpenSpecialist} /></section>
-      <section id="services"><Services onOpenService={onOpenService} /></section>
-      <section id="media"><Media /></section>
+        ))}
+      </div>
     </div>
   );
 }
