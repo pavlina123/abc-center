@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import Home from './Home';
 import Specialists from './Specialists';
+import SpecialistPage from './SpecialistPage'; // <-- Новый импорт
 import Services from './Services';
 import News from './News';
 import Media from './Media';
@@ -12,6 +13,7 @@ import MediaPanel from './MediaPanel';
 export default function App() {
   const [user, setUser] = useState(null);
   const [currentPage, setCurrentPage] = useState('home');
+  const [selectedSpecialist, setSelectedSpecialist] = useState(null); // <-- Стейт для страницы специалиста
   const [showLogin, setShowLogin] = useState(false);
 
   useEffect(() => {
@@ -39,6 +41,13 @@ export default function App() {
     setCurrentPage('home');
   };
 
+  // Функция для открытия страницы специалиста
+  const openSpecialist = (spec) => {
+    setSelectedSpecialist(spec);
+    setCurrentPage('specialist-page');
+    window.scrollTo(0, 0); // Прокрутка наверх
+  };
+
   if (user?.role === 'admin') return <AdminPanel user={user} onLogout={handleLogout} />;
   if (user?.role === 'media') return <MediaPanel user={user} onLogout={handleLogout} />;
 
@@ -47,11 +56,17 @@ export default function App() {
       <Header currentPage={currentPage} setCurrentPage={setCurrentPage} onLoginClick={() => setShowLogin(true)} />
       
       <main className="animate-fade-in">
-        {/* Главная страница теперь содержит ВСЕ секции */}
         {currentPage === 'home' && <Home />}
+        {currentPage === 'specialists' && <Specialists onOpenSpecialist={openSpecialist} />}
         
-        {/* Оставляем отдельные страницы для ПК-навигации */}
-        {currentPage === 'specialists' && <Specialists />}
+        {/* Отдельная страница специалиста */}
+        {currentPage === 'specialist-page' && selectedSpecialist && (
+          <SpecialistPage 
+            specialist={selectedSpecialist} 
+            onBack={() => setCurrentPage('home')} 
+          />
+        )}
+
         {currentPage === 'services' && <Services />}
         {currentPage === 'news' && <News />}
         {currentPage === 'media' && <Media />}
