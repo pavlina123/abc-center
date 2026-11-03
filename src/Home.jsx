@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import News from './News';
-import Specialists from './Specialists';
-import Services from './Services';
-import Media from './Media';
+import Specialists from './Specialists'; // <--- Добавили
 import { waLink } from './theme';
 
 const helpItems = [
@@ -14,7 +12,7 @@ const helpItems = [
   { title: "Английский", desc: "Для детей", icon: "🇬🇧" }
 ];
 
-export default function Home({ onOpenSpecialist, onOpenService, onOpenNews }) {
+export default function Home({ onOpenSpecialist, onOpenNews }) {
   const [showHelp, setShowHelp] = useState(false);
 
   return (
@@ -29,7 +27,7 @@ export default function Home({ onOpenSpecialist, onOpenService, onOpenNews }) {
                 Раскрываем потенциал <span className="text-abc-blue">вашего ребенка</span> 🎈
               </h1>
               <p className="text-sm md:text-lg text-gray-500 mb-8 max-w-lg mx-auto md:mx-0 font-medium">
-                Центр ABC — это международный центр развития. Мы объединили лучших специалистов и современные методики, чтобы каждый ребенок рос счастливым и уверенным в себе.
+                Центр ABC — это международный центр развития. Мы объединили лучших специалистов и современные методики.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
                 <a href={waLink()} target="_blank" rel="noreferrer" className="bg-abc-yellow hover:bg-yellow-300 text-abc-dark px-8 py-4 rounded-2xl font-black text-base md:text-lg transition shadow-lg shadow-abc-yellow/40 hover:-translate-y-1 animate-pulse">
@@ -38,7 +36,6 @@ export default function Home({ onOpenSpecialist, onOpenService, onOpenNews }) {
               </div>
             </div>
             
-            {/* Широкое фото */}
             <div className="flex-1 w-full max-w-[320px] md:max-w-xl mx-auto mb-6 md:mb-0">
               <div className="relative">
                 <div className="absolute inset-0 bg-abc-blue rounded-full blur-3xl opacity-20 transform scale-110"></div>
@@ -53,7 +50,7 @@ export default function Home({ onOpenSpecialist, onOpenService, onOpenNews }) {
         </div>
       </section>
 
-      {/* ЧЕМ МЫ ПОМОГАЕМ (Аккордеон) */}
+      {/* ЧЕМ МЫ ПОМОГАЕМ */}
       <section className="py-16 max-w-5xl mx-auto px-4 text-center">
         <button 
           onClick={() => setShowHelp(!showHelp)}
@@ -80,10 +77,15 @@ export default function Home({ onOpenSpecialist, onOpenService, onOpenNews }) {
         )}
       </section>
 
-      <section id="news"><News onOpenNews={onOpenNews} /></section>
-      <section id="specialists"><Specialists onOpenSpecialist={onOpenSpecialist} /></section>
-      <section id="services"><Services onOpenService={onOpenService} /></section>
-      <section id="media"><Media /></section>
+      {/* НОВОСТИ */}
+      <section id="news">
+        <News onOpenNews={onOpenNews} />
+      </section>
+
+      {/* ДОБАВИЛИ СПЕЦИАЛИСТОВ */}
+      <section id="specialists">
+        <Specialists onOpenSpecialist={onOpenSpecialist} />
+      </section>
     </div>
   );
 }
