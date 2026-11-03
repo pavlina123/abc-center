@@ -1,5 +1,6 @@
 import React from 'react';
 import { waLink } from './theme';
+import logo from './assets/logo.png'; // <--- Импортируем твое фото
 
 export default function Header({ currentPage, setCurrentPage, onLoginClick }) {
   const navItems = [
@@ -13,10 +14,16 @@ export default function Header({ currentPage, setCurrentPage, onLoginClick }) {
   return (
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg shadow-sm border-b border-abc-green/30">
       <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+        
+        {/* Логотип и название */}
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentPage('home')}>
-          <div className="w-12 h-12 bg-abc-yellow rounded-2xl flex items-center justify-center text-2xl font-black shadow-md shadow-abc-yellow/50 rotate-3">🎈</div>
+          <img 
+            src={logo} 
+            alt="Логотип Центра ABC" 
+            className="w-12 h-12 object-contain rounded-xl" 
+          />
           <div>
-            <h1 className="text-xl font-black text-abc-dark">Центр ABC</h1>
+            <h1 className="text-xl font-black text-abc-dark leading-none">Центр ABC</h1>
             <span className="text-[10px] text-abc-blue font-bold uppercase tracking-wider">Развитие детей</span>
           </div>
         </div>
