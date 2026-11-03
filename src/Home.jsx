@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import News from './News';
 import Specialists from './Specialists';
-import Services from './Services'; // <--- Добавили Услуги
+import Services from './Services';
+import Media from './Media'; // <--- Добавили Медиа
 import { waLink } from './theme';
 
 const helpItems = [
@@ -80,9 +81,10 @@ export default function Home({ onOpenSpecialist, onOpenService, onOpenNews }) {
 
       <section id="news"><News onOpenNews={onOpenNews} /></section>
       <section id="specialists"><Specialists onOpenSpecialist={onOpenSpecialist} /></section>
-      
-      {/* ДОБАВИЛИ УСЛУГИ */}
       <section id="services"><Services onOpenService={onOpenService} /></section>
+      
+      {/* ДОБАВИЛИ МЕДИА */}
+      <section id="media"><Media /></section>
 
     </div>
   );
