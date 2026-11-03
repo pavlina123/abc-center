@@ -1,32 +1,41 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Nunito:wght@400;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Montserrat', sans-serif;
-  --font-display: 'Playfair Display', serif;
+  --font-sans: 'Nunito', sans-serif;
+  --font-display: 'Montserrat', sans-serif;
   
-  --color-abc-navy: #0f172a;
-  --color-abc-blue: #1e3a8a;
-  --color-abc-gold: #d97706;
-  --color-abc-goldlight: #fbbf24;
-  --color-abc-cream: #f8fafc;
+  --color-abc-green: #86efac; /* Нежный зеленый */
+  --color-abc-blue: #7dd3fc;  /* Небесно-голубой */
+  --color-abc-yellow: #fde047; /* Солнечный желтый */
+  --color-abc-bg: #f0fdf4; /* Очень светлый фон */
+  --color-abc-dark: #1e293b; /* Темный для текста */
 }
 
 body {
-  background-color: var(--color-abc-cream);
-  color: var(--color-abc-navy);
+  background-color: var(--color-abc-bg);
+  color: var(--color-abc-dark);
   font-family: var(--font-sans);
 }
 
 h1, h2, h3, h4 {
   font-family: var(--font-display);
+  font-weight: 800;
 }
 
-/* Анимация появления */
+/* Анимации */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.animate-fade-in {
-  animation: fadeIn 0.6s ease-out forwards;
+.animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
+.animate-float { animation: float 4s ease-in-out infinite; }
+
+/* Скрываем скроллбар для карусели */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
