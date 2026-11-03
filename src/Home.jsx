@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import News from './News'; // <--- Добавили Новости
+import News from './News';
+import Specialists from './Specialists'; // <--- Добавили
 import { waLink } from './theme';
 
 const helpItems = [
@@ -11,7 +12,7 @@ const helpItems = [
   { title: "Английский", desc: "Для детей", icon: "🇬🇧" }
 ];
 
-export default function Home({ onOpenNews }) { // <--- Передали функцию для открытия новостей
+export default function Home({ onOpenSpecialist, onOpenNews }) {
   const [showHelp, setShowHelp] = useState(false);
 
   return (
@@ -76,9 +77,14 @@ export default function Home({ onOpenNews }) { // <--- Передали функ
         )}
       </section>
 
-      {/* ДОБАВИЛИ НОВОСТИ */}
+      {/* НОВОСТИ */}
       <section id="news">
         <News onOpenNews={onOpenNews} />
+      </section>
+
+      {/* ДОБАВИЛИ СПЕЦИАЛИСТОВ */}
+      <section id="specialists">
+        <Specialists onOpenSpecialist={onOpenSpecialist} />
       </section>
     </div>
   );
