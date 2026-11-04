@@ -1,5 +1,5 @@
 import React from 'react';
-import { waLink, formatPrice } from './theme';
+import { waLink } from './theme';
 
 export default function ServicePage({ service, onBack }) {
   if (!service) return null;
@@ -23,11 +23,12 @@ export default function ServicePage({ service, onBack }) {
             </div>
             
             <h1 className="text-3xl md:text-5xl font-black text-abc-dark mb-4">{service.title}</h1>
-            <p className="text-gray-600 leading-relaxed mb-8">{service.description || 'Описание пока не добавлено.'}</p>
+            <p className="text-gray-600 leading-relaxed mb-8 text-paragraphs">{service.description || 'Описание пока не добавлено.'}</p>
             
             <div className="bg-abc-bg p-6 rounded-2xl inline-block mb-8 w-full md:w-auto">
               <span className="text-sm font-bold text-gray-500 uppercase block mb-1">Стоимость</span>
-              <span className="text-3xl font-black text-abc-dark">{formatPrice(service.price)}</span>
+              {/* Просто выводим то, что в базе */}
+              <span className="text-3xl font-black text-abc-dark">{service.price || 'По запросу'}</span>
             </div>
 
             <a href={waLink(`Хочу записаться на услугу: ${service.title}`)} target="_blank" rel="noreferrer" className="block w-full bg-abc-yellow text-center text-abc-dark font-black py-4 rounded-2xl hover:bg-yellow-300 transition shadow-lg shadow-abc-yellow/40 text-lg">

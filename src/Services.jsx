@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
-import { formatPrice } from './theme';
 
 export default function Services({ onOpenService }) {
   const [services, setServices] = useState([]);
@@ -36,8 +35,9 @@ export default function Services({ onOpenService }) {
               <p className="text-xs md:text-sm text-gray-500 mb-4 line-clamp-3 text-paragraphs">{service.description}</p>
               
               <div className="flex items-center justify-between mt-auto">
+                {/* Просто выводим то, что в базе */}
                 <span className="text-base md:text-xl font-black text-abc-dark">
-                  {service.price ? `${Number(service.price).toLocaleString('ru-RU')} ₸` : 'По запросу'}
+                  {service.price || 'По запросу'}
                 </span>
                 <button onClick={() => onOpenService(service)} className="bg-abc-yellow text-abc-dark px-4 py-2 rounded-xl font-bold hover:bg-yellow-300 transition text-sm shadow-md">
                   Подробнее
