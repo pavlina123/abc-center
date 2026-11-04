@@ -4,14 +4,12 @@ import { supabase } from './supabaseClient';
 export default function AdminPanel({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('dashboard');
   
-  // Стейты для данных
   const [specialists, setSpecialists] = useState([]);
   const [services, setServices] = useState([]);
   const [news, setNews] = useState([]);
   const [media, setMedia] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Стейты для форм
   const [formData, setFormData] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -93,26 +91,40 @@ export default function AdminPanel({ user, onLogout }) {
 
   const saveItem = async (e, table) => {
     e.preventDefault();
-    const dataToSave = {};
-    Object.keys(formData).forEach(key => {
-      const val = formData[key];
-      if (val !== undefined && val !== null && val !== '') {
-        dataToSave[key] = typeof val === 'string' ? val.trim() : val;
+    
+    // Копируем данные формы
+    const dataToSave = { ...formData };
+
+    // Удаляем служебные поля, на которые ругается база при обновлении
+    delete dataToSave.id;
+    delete dataToSave.created_at;
+    delete dataToSave.updated_at;
+
+    // Очищаем пустые строки и пробелы
+    Object.keys(dataToSave).forEach(key => {
+      const val = dataToSave[key];
+      if (val === undefined || val === null) {
+        delete dataToSave[key];
+      } else if (typeof val === 'string') {
+        dataToSave[key] = val.trim();
       }
     });
 
     let error;
     if (isEditing) {
+      // Обновляем существующую запись по ID
       const { error: err } = await supabase.from(table).update(dataToSave).eq('id', formData.id);
       error = err;
     } else {
-      delete dataToSave.id;
+      // Создаем новую запись
       const { error: err } = await supabase.from(table).insert([dataToSave]);
       error = err;
     }
     
-    if (error) alert('Ошибка: ' + error.message);
-    else {
+    if (error) {
+      alert('Ошибка при сохранении: ' + error.message);
+      console.error('Ошибка Supabase:', error);
+    } else {
       setFormData({});
       setIsEditing(false);
       fetchAllData();
